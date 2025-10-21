@@ -18,6 +18,7 @@
             --status-bg: #f1f3f4;
             --status-success: #e6f4ea;
             --status-error: #fce8e6;
+            --input-bg: #f1f3f4;
         }
 
         body {
@@ -29,8 +30,7 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            margin: 0;
-            padding: 20px;
+            margin: 20px;
             box-sizing: border-box;
         }
 
@@ -42,10 +42,10 @@
             padding: 2.5rem;
             max-width: 600px;
             width: 100%;
-            text-align: center;
         }
 
         header {
+            text-align: center;
             margin-bottom: 2rem;
         }
 
@@ -65,6 +65,7 @@
             color: var(--text-secondary);
             font-size: 1rem;
             margin-bottom: 1.5rem;
+            text-align: center;
         }
 
         .button {
@@ -107,6 +108,7 @@
         .launch-btn {
             background-color: var(--google-yellow);
             color: #333;
+            margin-top: 1.5rem; /* 與表單分隔 */
         }
         .launch-btn:hover:not(:disabled) {
             background-color: var(--google-yellow-hover);
@@ -127,7 +129,6 @@
             justify-content: center;
         }
 
-        /* 狀態顏色 */
         #status.status-info { background-color: var(--status-bg); }
         #status.status-success { background-color: var(--status-success); color: #1e8e3e; }
         #status.status-error { background-color: var(--status-error); color: #d93025; }
@@ -136,7 +137,6 @@
             color: #1967d2;
         }
         
-        /* 簡易 loading spinner */
         .loader {
             width: 16px;
             height: 16px;
@@ -154,10 +154,71 @@
             100% { transform: rotate(360deg); }
         }
 
+        /* --- 新增的表單樣式 --- */
+        #config_form {
+            display: none; /* 預設隱藏 */
+            margin-top: 2rem;
+            text-align: left;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        /* 在小螢幕上變為單欄 */
+        @media (max-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .form-group select,
+        .form-group input {
+            font-size: 1rem;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+            background-color: var(--input-bg);
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .form-group select:focus,
+        .form-group input:focus {
+            outline: 2px solid var(--google-blue);
+            background-color: var(--card-bg);
+            border-color: var(--google-blue);
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1; /* 佔滿整行 */
+        }
+        
+        hr {
+            border: none;
+            border-top: 1px solid var(--border-color);
+            margin: 1.5rem 0;
+        }
+        
         footer {
             margin-top: 2rem;
             font-size: 0.8rem;
             color: #aaa;
+            text-align: center;
         }
 
         footer a {
@@ -178,12 +239,11 @@
     <div class="container">
         <header>
             <div class="logo">🎙️</div>
-            <h1>Whisper 語音轉錄工具</h1>
+            <h1>Whisper 轉錄工具</h1>
         </header>
 
         <main>
-            <p>本工具將在您自己的 Google Colab 環境中執行 Whisper。點擊下方按鈕登入，我們將會請求您的 Google Drive 權限，以便為您建立一份 Colab 筆記本。</p>
-            <p>您的音檔和轉錄結果將會保留在您自己的 Colab 環境中，不會上傳到本網站。</p>
+            <p>本工具將在您自己的 Google Colab 環境中執行 Whisper。請先登入，並設定轉錄參數。</p>
 
             <button id="authorize_button" class="button g-btn">
                 <svg viewBox="0 0 48 48">
@@ -196,13 +256,76 @@
                 1. 使用 Google 帳號登入
             </button>
             
+            <form id="config_form">
+                <hr>
+                <h2>2. 轉錄參數設定</h2>
+                <div class="form-grid">
+                    
+                    <div class="form-group">
+                        <label for="model_select">模型 (Model)</label>
+                        <select id="model_select">
+                            <option value="large-v3">large-v3 (推薦)</option>
+                            <option value="large-v2">large-v2</option>
+                            <option value="large">large</option>
+                            <option value="medium">medium</option>
+                            <option value="small">small</option>
+                            <option value="base">base</option>
+                            <option value="tiny">tiny</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lang_select">語言 (Language)</label>
+                        <select id="lang_select">
+                            <option value="Chinese">中文 (Chinese)</option>
+                            <option value="English">英文 (English)</option>
+                            <option value="">自動偵測 (Auto)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="task_select">任務 (Task)</label>
+                        <select id="task_select">
+                            <option value="transcribe">語音轉文字 (transcribe)</option>
+                            <option value="translate">翻譯成英文 (translate)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="format_select">輸出格式 (Format)</label>
+                        <select id="format_select">
+                            <option value="all">所有格式 (all)</option>
+                            <option value="txt">純文字 (txt)</option>
+                            <option value="srt">字幕 (srt)</option>
+                            <option value="vtt">字幕 (vtt)</option>
+                            <option value="tsv">TSV</option>
+                            <option value="json">JSON</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="output_dir_input">輸出資料夾 (Output Dir)</label>
+                        <input type="text" id="output_dir_input" value="./result" placeholder="留空則輸出在當前資料夾">
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="device_select">執行裝置 (Device)</label>
+                        <select id="device_select">
+                            <option value="cuda">GPU (T4 推薦)</option>
+                            <option value="cpu">CPU (速度慢)</option>
+                        </select>
+                    </div>
+
+                </div>
+            </form>
+            
             <button id="create_button" class="button launch-btn" style="display:none;">
                 <svg viewBox="0 0 32 32" fill="currentColor">
                     <path d="M16,2.5c-0.3,0-0.6,0-0.9,0.1C13.8,2.8,12.5,3.4,11.3,4.1C7.3,6.5,4.1,10.7,4.1,15.4c0,0.2,0,0.5,0,0.7c0,0.3,0,0.6,0.1,0.9c0.2,1.3,0.8,2.6,1.5,3.8c2.4,4,6.6,7.2,11.3,7.2c0.2,0,0.5,0,0.7,0c0.3,0,0.6,0,0.9-0.1c1.3-0.2,2.6-0.8,3.8-1.5c4-2.4,7.2-6.6,7.2-11.3c0-0.2,0-0.5,0-0.7c0-0.3,0-0.6-0.1-0.9c-0.2-1.3-0.8-2.6-1.5-3.8C25.7,6.5,21.5,3.3,16.8,3.3C16.5,3.3,16.2,3.3,16,3.3C16,2.9,16,2.7,16,2.5z M16.4,26.5c-4,0-7.4-2.2-9.1-5.3c-0.6-1-0.9-2.1-1.1-3.2c-0.1-0.5-0.1-1-0.1-1.5c0-0.5,0-1,0.1-1.5c0.1-1.1,0.5-2.2,1.1-3.2C8.9,8.7,12.3,6.5,16.4,6.5c1.1,0,2.2,0.3,3.2,0.9c1,0.6,1.9,1.4,2.6,2.3c0.7,0.9,1.3,1.9,1.7,3c0.1,0.2,0.2,0.5,0.2,0.8c0.3,1,0.4,2,0.4,3c0,0.5,0,1-0.1,1.5c-0.1,1.1-0.5,2.2-1.1,3.2c-1.8,3.1-5.1,5.3-9.1,5.3C16.6,26.5,16.5,26.5,16.4,26.5z"></path>
                     <path d="M12.9,10.1c-0.5-0.3-1.1-0.2-1.4,0.3c-0.3,0.5-0.2,1.1,0.3,1.4c1,0.6,1.6,1.7,1.6,2.8c0,1.1-0.6,2.2-1.6,2.8c-0.5,0.3-0.6,0.9-0.3,1.4c0.2,0.4,0.6,0.5,1,0.5c0.2,0,0.3,0,0.5-0.1c1.5-0.9,2.5-2.5,2.5-4.2C15.4,12.6,14.4,11,12.9,10.1z"></path>
-                    <path d="M19.1,10.1c-1.5,0.9-2.5,2.5-2.5,4.2c0,1.7,1,3.3,2.5,4.2c0.2,0.1,0.3,0.1,0.5,0.1c0.4,0,0.8-0.2,1-0.5c0.3-0.5,0.2-1.1-0.3-1.4c-1-0.6-1.6-1.7-1.6-2.8c0-1.1,0.6-2.2,1.6-2.8c0.5-0.3,0.6-0.9,0.3-1.4C19.9,10.3,19.6,10.2,19.1,10.1z"></path>
+                    <path d="M19.1,10.1c-1.5,0.9-2.5,2.5-2.5,4.2c0,1.7,1,3.3,2.5,4.2c0.2,0.1,0.3,0.1,0.5,0.1c0.4,0,0.8-0.2,1-0.5c0.3-0.5,0.2,1.1-0.3-1.4c-1-0.6-1.6-1.7-1.6-2.8c0-1.1,0.6-2.2,1.6-2.8c0.5-0.3,0.6-0.9,0.3-1.4C19.9,10.3,19.6,10.2,19.1,10.1z"></path>
                 </svg>
-                2. 建立並啟動轉錄筆記本
+                3. 建立並啟動轉錄筆記本
             </button>
             
             <div id="status" class="status-info">狀態：等待登入...</div>
@@ -228,14 +351,15 @@
         
         // =========================================================================
         // (Part 2) Colab 筆記本模板 (儲存為 JSON 物件)
-        // ** 這是您提供的最新版 Colab 模板 **
+        // *** 這是最新的「單一按鈕」簡化版 ***
+        // *** 注意：第一個 cell (設定檔) 將由 JS 動態插入 ***
         // =========================================================================
-        const COLAB_NOTEBOOK_CONTENT = {
+        const COLAB_NOTEBOOK_TEMPLATE = {
             "nbformat": 4,
             "nbformat_minor": 0,
             "metadata": {
                 "colab": {
-                    "name": "Whisper 語音轉錄筆記本 (自動產生)",
+                    "name": "Whisper 轉錄筆記本 (自動產生)",
                     "provenance": []
                 },
                 "kernelspec": {
@@ -251,193 +375,75 @@
                     "cell_type": "markdown",
                     "metadata": { "id": "intro-md" },
                     "source": [
-                        "# Whisper 語音轉錄工具\n\n",
-                        "歡迎使用！這個筆記本將在您的 Colab 環境中執行 Whisper。\n\n",
+                        "# Whisper 語音轉錄工具 (單一按鈕版)\n\n",
+                        "您的參數（模型、語言等）已經從啟動網頁載入。\n\n",
                         "**重要提示：** 為了獲得最佳（免費）轉錄速度，請先設定 GPU：\n\n",
                         "1.  點擊頂端選單的「**執行階段**」(Runtime)\n",
                         "2.  選擇「**變更執行階段類型**」(Change runtime type)\n",
                         "3.  在「硬體加速器」下拉選單中，選擇「**T4 GPU**」\n",
                         "4.  點擊「**儲存**」\n\n",
                         "--- \n",
-                        "### 步驟 0：安裝 Whisper\n\n",
-                        "請點擊左側的「播放」按鈕，安裝 Whisper 函式庫。"
+                        "### 🚀 開始執行\n\n",
+                        "**請點擊下方儲存格左側的「播放」按鈕**，即可依序完成：\n",
+                        "1.  安裝 Whisper 函式庫\n",
+                        "2.  跳出視窗讓您上傳音檔\n",
+                        "3.  依照您設定的參數執行轉錄"
                     ]
                 },
                 {
                     "cell_type": "code",
-                    "metadata": { "id": "install-whisper", "colab": {} },
+                    "metadata": { "id": "run-all-cell", "colab": {} },
                     "source": [
-                        "!pip install git+https://github.com/openai/whisper.git\n",
-                        "!pip install ipywidgets"
-                    ],
-                    "execution_count": null,
-                    "outputs": []
-                },
-                {
-                    "cell_type": "markdown",
-                    "metadata": { "id": "upload-md" },
-                    "source": [
-                        "--- \n",
-                        "### 步驟 1：上傳您的音檔\n\n",
-                        "點擊下方的「播放」按鈕，然後選擇您要轉錄的音檔（MP3, WAV, M4A 等）。"
-                    ]
-                },
-                {
-                    "cell_type": "code",
-                    "metadata": { "id": "upload-code", "colab": { "base_uri": "https://localhost:8080/" } },
-                    "source": [
-                        "from google.colab import files\n",
-                        "import os\n\n",
-                        "print(\"請上傳您的音檔：\")\n",
-                        "uploaded = files.upload()\n\n",
-                        "if not uploaded:\n",
-                        "  print(\"\\n您沒有上傳任何檔案。\")\n",
-                        "else:\n",
-                        "  # 取得上傳檔案的檔名\n",
-                        "  filename = next(iter(uploaded))\n",
-                        "  # 將檔名儲存起來，供下一個 cell 使用\n",
-                        "  %store filename\n",
-                        "  print(f\"\\n成功上傳： {filename}\")"
-                    ],
-                    "execution_count": null,
-                    "outputs": []
-                },
-                {
-                    "cell_type": "markdown",
-                    "metadata": { "id": "transcribe-md" },
-                    "source": [
-                        "--- \n",
-                        "### 步驟 2：設定參數並開始轉錄\n\n",
-                        "請在下方選擇您要的設定，然後點擊「開始轉錄」按鈕。\n\n",
-                        "第一次執行時，模型會需要一些時間下載（例如 `large-v3` 模型約 3GB）。\n\n",
-                        "**重要提示**：請再次確認您已在「**執行階段**」->「**變更執行階段類型**」中選取了「**T4 GPU**」，並將下方的「執行裝置」設為「GPU (T4 推薦)」。"
-                    ]
-                },
-                {
-                    "cell_type": "code",
-                    "metadata": { "id": "transcribe-code", "colab": {} },
-                    "source": [
-                        "import whisper\n",
-                        "import ipywidgets as widgets\n",
-                        "from IPython.display import display, clear_output, VBox, HBox\n",
                         "import os\n",
+                        "from google.colab import files\n\n",
+                        "# --- 步驟 1：安裝 Whisper ---\n",
+                        "print(\"--- 步驟 1/3：正在安裝 Whisper... ---\")\n",
+                        "!pip install git+https://github.com/openai/whisper.git > /dev/null\n",
+                        "print(\"Whisper 安裝完成。\\n\")\n\n",
+                        
+                        "# --- 步驟 2：上傳檔案 ---\n",
+                        "print(\"--- 步驟 2/3：請上傳您的音檔 --- (請在下方跳出的視窗選取檔案)\")\n",
+                        "uploaded = files.upload()\n\n",
+                        
+                        "if not uploaded:\n",
+                        "    print(\"\\n錯誤：您沒有上傳任何檔案。請重新執行此儲存格。\")\n",
+                        "else:\n",
+                        "    filename = next(iter(uploaded))\n",
+                        "    print(f\"\\n成功上傳： {filename}\\n\")\n\n",
+                        
+                        "    # --- 步驟 3：執行轉錄 ---\n",
+                        "    # 參數 (MODEL, LANGUAGE 等) 已在第一個隱藏儲存格中定義\n",
+                        "    print(\"--- 步驟 3/3：正在組合指令並開始轉錄... ---\")\n",
+                        "    print(f\"使用模型: {MODEL}, 語言: {'自動偵測' if not LANGUAGE else LANGUAGE}, 任務: {TASK}\")\n\n",
+                        
+                        "    # 組合 Whisper 指令\n",
+                        "    cmd = f'whisper \"{filename}\" --model {MODEL} --task {TASK} --output_format {OUTPUT_FORMAT}'\n",
+                        "    \n",
+                        "    if LANGUAGE:\n",
+                        "        cmd += f' --language \"{LANGUAGE}\"'\n",
+                        "    \n",
+                        "    if OUTPUT_DIR:\n",
+                        "        cmd += f' --output_dir \"{OUTPUT_DIR}\"'\n",
+                        "        os.makedirs(OUTPUT_DIR, exist_ok=True)\n",
                         "\n",
-                        "# --- 建立 GUI 控制項 ---\n",
-                        "style = {'description_width': 'initial'} # 讓描述文字完整顯示\n",
-                        "model_dd = widgets.Dropdown(\n",
-                        "    options=[\"tiny\", \"base\", \"small\", \"medium\", \"large\", \"large-v2\", \"large-v3\"],\n",
-                        "    value='large-v3',\n",
-                        "    description='模型 (Model):',\n",
-                        "    style=style\n",
-                        ")\n",
-                        "lang_dd = widgets.Dropdown(\n",
-                        "    options=[('自動偵測 (Auto)', ''), ('中文 (Chinese)', 'Chinese'), ('英文 (English)', 'English')],\n",
-                        "    value='Chinese',\n",
-                        "    description='語言 (Language):',\n",
-                        "    style=style\n",
-                        ")\n",
-                        "task_dd = widgets.Dropdown(\n",
-                        "    options=[('語音轉文字 (transcribe)', 'transcribe'), ('翻譯成英文 (translate)', 'translate')],\n",
-                        "    value='transcribe',\n",
-                        "    description='任務 (Task):',\n",
-                        "    style=style\n",
-                        ")\n",
-                        "format_dd = widgets.Dropdown(\n",
-                        "    options=[\"all\", \"txt\", \"srt\", \"vtt\", \"tsv\", \"json\"],\n",
-                        "    value='all',\n",
-                        "    description='輸出格式 (Format):',\n",
-                        "    style=style\n",
-                        ")\n",
-                        "dir_text = widgets.Text(\n",
-                        "    value='./result',\n",
-                        "    description='輸出資料夾 (Output Dir):',\n",
-                        "    placeholder='留空則輸出在當前資料夾',\n",
-                        "    style=style\n",
-                        ")\n",
-                        "device_dd = widgets.Dropdown(\n",
-                        "    options=[('GPU (T4 推薦)', 'cuda'), ('CPU (速度慢)', 'cpu')],\n",
-                        "    value='cuda',\n",
-                        "    description='執行裝置 (Device):',\n",
-                        "    style=style\n",
-                        ")\n",
+                        "    if DEVICE == \"cpu\":\n",
+                        "        cmd += \" --device cpu --fp16 False\"\n",
+                        "    else:\n",
+                        "        cmd += \" --device cuda\" # 預設使用 Colab GPU\n",
                         "\n",
-                        "run_button = widgets.Button(\n",
-                        "    description=\"🔥 開始轉錄\",\n",
-                        "    tooltip='點擊開始執行 Whisper',\n",
-                        "    icon='play',\n",
-                        "    button_style='success'\n",
-                        ")\n",
-                        "output_area = widgets.Output()\n",
-                        "\n",
-                        "# --- 按鈕點擊事件 ---\n",
-                        "def on_button_clicked(b):\n",
-                        "    with output_area:\n",
-                        "        clear_output()\n",
-                        "        print(\"開始執行轉錄...\")\n",
-                        "\n",
-                        "        # 1. 取得 GUI 設定值\n",
-                        "        model = model_dd.value\n",
-                        "        language = lang_dd.value\n",
-                        "        task = task_dd.value\n",
-                        "        output_format = format_dd.value\n",
-                        "        output_dir = dir_text.value.strip()\n",
-                        "        device = device_dd.value\n",
-                        "\n",
-                        "        # 2. 檢查檔案是否存在\n",
-                        "        try:\n",
-                        "            %store -r filename\n",
-                        "            if 'filename' not in locals() or not os.path.exists(filename):\n",
-                        "                 print(f\"錯誤：找不到上傳的檔案。請重新執行 [步驟 1] 上傳檔案。\")\n",
-                        "                 return\n",
-                        "            print(f\"找到檔案： {filename}\")\n",
-                        "        except Exception as e:\n",
-                        "            print(f\"錯誤：無法讀取檔案名稱。請重新執行 [步驟 1] 上傳檔案。 {e}\")\n",
-                        "            return\n",
-                        "\n",
-                        "        # 3. 組合 Whisper 指令\n",
-                        "        cmd = f'whisper \"{filename}\" --model {model} --task {task} --output_format {output_format}'\n",
-                        "        \n",
-                        "        if language:\n",
-                        "            cmd += f' --language \"{language}\"'\n",
-                        "        \n",
-                        "        if output_dir:\n",
-                        "            cmd += f' --output_dir \"{output_dir}\"'\n",
-                        "            # 確保資料夾存在\n",
-                        "            os.makedirs(output_dir, exist_ok=True)\n",
-                        "\n",
-                        "        if device == \"cpu\":\n",
-                        "            cmd += \" --device cpu --fp16 False\"\n",
+                        "    print(f\"\\n即將執行指令：\\n{cmd}\\n\")\n",
+                        "    print(\"--- 開始執行 Whisper (請稍候，下載模型可能需要幾分鐘) ---\")\n",
+                        "    \n",
+                        "    # 執行指令\n",
+                        "    try:\n",
+                        "        get_ipython().system(cmd)\n",
+                        "        print(\"\\n--- 轉錄執行完畢 ---\")\n",
+                        "        if OUTPUT_DIR:\n",
+                        "            print(f\"✅ 成功！檔案已儲存於左側檔案列表的 {OUTPUT_DIR} 資料夾中。\")\n",
                         "        else:\n",
-                        "            cmd += \" --device cuda\" # 預設使用 Colab GPU\n",
-                        "\n",
-                        "        print(f\"即將執行指令： {cmd}\")\n",
-                        "        print(\"--- 開始執行 Whisper (請稍候) ---\")\n",
-                        "\n",
-                        "        # 4. 執行指令\n",
-                        "        try:\n",
-                        "            # 使用 get_ipython().system() 才能在 Colab cell 中正確執行\n",
-                        "            get_ipython().system(cmd)\n",
-                        "            print(\"--- 執行完畢 ---\")\n",
-                        "            if output_dir:\n",
-                        "                print(f\"檔案已儲存於左側檔案列表的 {output_dir} 資料夾中。\")\n",
-                        "            else:\n",
-                        "                 print(\"檔案已儲存於左側檔案列表中。\")\n",
-                        "        except Exception as e:\n",
-                        "            print(f\"執行 Whisper 時發生錯誤：{e}\")\n",
-                        "\n",
-                        "# --- 顯示 GUI ---\n",
-                        "# 使用 VBox 垂直排列所有控制項\n",
-                        "gui_layout = VBox([\n",
-                        "    model_dd,\n",
-                        "    lang_dd,\n",
-                        "    task_dd,\n",
-                        "    format_dd,\n",
-                        "    dir_text,\n",
-                        "    device_dd,\n",
-                        "    run_button\n",
-                        "])\n",
-                        "\n",
-                        "display(gui_layout, output_area)"
+                        "             print(\"✅ 成功！檔案已儲存於左側檔案列表中。\")\n",
+                        "    except Exception as e:\n",
+                        "        print(f\"執行 Whisper 時發生錯誤：{e}\")\n"
                     ],
                     "execution_count": null,
                     "outputs": []
@@ -453,8 +459,18 @@
         let gisInited = false;
 
         const authButton = document.getElementById('authorize_button');
+        const configForm = document.getElementById('config_form');
         const createButton = document.getElementById('create_button');
         const statusDiv = document.getElementById('status');
+        
+        // 表單元素
+        const model_select = document.getElementById('model_select');
+        const lang_select = document.getElementById('lang_select');
+        const task_select = document.getElementById('task_select');
+        const format_select = document.getElementById('format_select');
+        const output_dir_input = document.getElementById('output_dir_input');
+        const device_select = document.getElementById('device_select');
+
 
         authButton.onclick = handleAuthClick;
         createButton.onclick = handleCreateClick;
@@ -518,8 +534,9 @@
                 if (resp.error) {
                     throw (resp);
                 }
-                updateStatus('狀態：登入成功！', 'success');
+                updateStatus('狀態：登入成功！請設定參數。', 'success');
                 authButton.style.display = 'none'; // 隱藏登入按鈕
+                configForm.style.display = 'block'; // 顯示設定表單
                 createButton.style.display = 'inline-flex'; // 顯示建立按鈕
                 createButton.disabled = false;
             };
@@ -531,19 +548,57 @@
         // 步驟 6: 處理「建立並啟動」按鈕點擊
         async function handleCreateClick() {
             try {
-                updateStatus('狀態：正在為您建立 Colab 筆記本...', 'loading');
+                updateStatus('狀態：正在讀取設定並建立筆記本...', 'loading');
                 createButton.disabled = true;
 
-                // 將 JSON 物件轉換為字串
-                const notebookString = JSON.stringify(COLAB_NOTEBOOK_CONTENT);
+                // --- 這是新的核心邏輯 ---
+                // 1. 讀取 HTML 表單中的所有設定值
+                const model = model_select.value;
+                const language = lang_select.value;
+                const task = task_select.value;
+                const output_format = format_select.value;
+                const output_dir = output_dir_input.value.trim();
+                const device = device_select.value;
                 
-                // 準備 multipart request body
+                // 2. 建立一個 Python 程式碼字串，用來定義這些變數
+                // 注意：Python 字串需要用引號括起來，所以我們在 JS 中要處理 "
+                const configCode = `
+# --- 由啟動器自動產生的設定 (Auto-generated settings) ---
+MODEL = "${model}"
+LANGUAGE = "${language}"
+TASK = "${task}"
+OUTPUT_FORMAT = "${output_format}"
+OUTPUT_DIR = "${output_dir}"
+DEVICE = "${device}"
+# ----------------------------------------------------
+`;
+                // 3. 建立這個設定檔的 Colab 儲存格 (cell)
+                const configCell = {
+                    "cell_type": "code",
+                    "metadata": { 
+                        "id": "config-cell-autogen",
+                        "colab": { "jupyter": { "source_hidden": true } } // 預設摺疊此儲存格
+                    },
+                    "source": configCode.trim().split('\n'), // 轉換為 Colab 接受的行陣列
+                    "execution_count": null,
+                    "outputs": []
+                };
+
+                // 4. 取得筆記本模板，並將設定 cell 插入到最前面
+                // **重要**：我們使用 deep copy (JSON.parse/stringify) 確保模板不被永久修改
+                let notebookContent = JSON.parse(JSON.stringify(COLAB_NOTEBOOK_TEMPLATE));
+                notebookContent.cells.unshift(configCell);
+                
+                // 5. 將修改後的筆記本內容轉換為字串
+                const notebookString = JSON.stringify(notebookContent);
+                
+                // --- 舊的 Drive API 邏輯 (上傳檔案) ---
                 const boundary = '-------314159265358979323846';
-                const delimiter = "\r\n--" + boundary + "\r\n";
+                const delimiter = "\r\n--" + boundary + "\rn";
                 const close_delim = "\r\n--" + boundary + "--";
 
                 const metadata = {
-                    'name': 'Whisper 語音轉錄筆記本 (自動產生).ipynb',
+                    'name': `Whisper 轉錄筆記本 (${model}).ipynb`, // 檔名可以包含模型
                     'mimeType': 'application/vnd.google.colab' 
                 };
 
@@ -577,10 +632,6 @@
                 window.open(colabUrl, '_blank');
                 
                 createButton.disabled = false;
-                createButton.textContent = '2. 再次建立一個新的筆記本';
-                // 恢復 SVG 圖示 (因為 textContent 會蓋掉它)
-                createButton.prepend(document.querySelector('.launch-btn svg').cloneNode(true));
-
 
             } catch (error) {
                 console.error(error);
